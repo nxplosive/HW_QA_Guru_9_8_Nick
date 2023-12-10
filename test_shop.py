@@ -37,11 +37,12 @@ class TestProducts:
 
     def test_product_buy(self, product_book, product_shlapa):
         # TODO напишите проверки на метод buy
-        assert product_book.buy(10) == "Gut"
+        product_book.buy(10)
+        assert product_book.quantity == 990
         product_shlapa.buy(1)
         assert product_shlapa.quantity == 2
 
-    def test_product_buy_more_than_available(self, product_book, product_shlapa):
+    def test_product_buy_more_that_available(self, product_book, product_shlapa):
         # TODO напишите проверки на метод buy,
         #  которые ожидают ошибку ValueError при попытке купить больше, чем есть в наличии
         with pytest.raises(ValueError):
@@ -78,11 +79,35 @@ class TestCart:
         cart.remove_product(product_shlapa, 1)
         assert cart.products.get(product_shlapa) == 2
 
+    def test_remove_all_products(self, product_book, product_shlapa, cart):
+        cart.add_product(product_book, 4)
+        cart.remove_product(product_book, 4)
+        assert cart.products.get(product_book) == None
+        cart.add_product(product_shlapa, 2)
+        cart.remove_product(product_shlapa, 2)
+        assert cart.products.get(product_shlapa) == None
+
+    def test_remove_more_products_that_avalible(self, product_book, product_shlapa, cart):
+        cart.add_product(product_book, 4)
+        cart.remove_product(product_book, 5)
+        assert cart.products == {}
+        cart.add_product(product_shlapa, 3)
+        cart.remove_product(product_shlapa, 10)
+        assert cart.products == {}
+
+    def test_remove_product_no_remove_count(self, cart, product_book, product_shlapa):
+        cart.add_product(product_book, 5)
+        cart.remove_product(product_book)
+        assert cart.products == {}
+        cart.add_product(product_shlapa, 2)
+        cart.remove_product(product_shlapa)
+        assert cart.products == {}
+
     def test_clear(self, cart, product_book, product_shlapa):
         cart.add_product(product_book, 3)
         cart.add_product(product_shlapa, 1)
         cart.clear()
-        assert {} == cart.products
+        assert cart.products == {}
 
     def test_total_price(self, cart, product_book, product_shlapa):
         cart.add_product(product_book, 4)
@@ -96,3 +121,8 @@ class TestCart:
         assert product_shlapa.quantity == 2
         assert product_book.quantity == 995
         assert cart.products == {}
+
+    def test_buy_more_that_available(self, cart, product_shlapa, product_book):
+        cart.add_product(product_shlapa, 40)
+        with pytest.raises(ValueError):
+            cart.buy()
